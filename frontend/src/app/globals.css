@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Animated pastel gradient background */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  background: linear-gradient(120deg,
+    #ffe4e6 0%,       /* rose-100 */
+    #fecaca 18%,      /* red-200 */
+    #fde2ff 36%,      /* fuchsia-100 */
+    #e0f2fe 54%,      /* sky-100 */
+    #bbf7d0 72%,      /* green-200 */
+    #fae8ff 100%      /* fuchsia-100 */);
+  background-size: 400% 400%;
+  animation: gradient-shift 18s ease infinite;
+}
+
+/* Soft vignetting to add depth */
+.pastel-vignette {
+  position: fixed;
+  inset: -10%;
+  z-index: -9;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 800px at 10% 10%, rgba(255,255,255,0.35), transparent 60%),
+    radial-gradient(1000px 700px at 90% 20%, rgba(255,255,255,0.35), transparent 60%),
+    radial-gradient(900px 600px at 30% 90%, rgba(255,255,255,0.35), transparent 60%),
+    radial-gradient(140% 140% at 50% 50%, rgba(0,0,0,0.08), rgba(0,0,0,0.02) 50%, transparent 70%);
+  mix-blend-mode: soft-light;
+}
+
+/* Floating blurred blobs */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-18px) translateX(8px); }
+}
+
+.blob {
+  position: absolute;
+  filter: blur(60px);
+  opacity: 0.45;
+  border-radius: 9999px;
+  animation: floaty 12s ease-in-out infinite;
+}

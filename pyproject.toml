@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "web-boilerplate"
+version = "0.1.0"
+description = "FastAPI boilerplate"
+authors = ["Tomas Matlovic <tomas.matlovic@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "web_boilerplate"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.116.1"
+uvicorn = {extras = ["standard"], version = "^0.35.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
