@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "predev": "pnpm install",
+    "dev": "pnpm exec next dev",
+    "dev:exec": "pnpm exec next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
