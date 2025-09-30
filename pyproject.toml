@@ -11,6 +11,9 @@ packages = [{include = "web_boilerplate"}]
 python = "^3.12"
 fastapi = "^0.116.1"
 uvicorn = {extras = ["standard"], version = "^0.35.0"}
+sqlalchemy = "^2.0.36"
+asyncpg = "^0.30.0"
+pydantic-settings = "^2.6.1"
 
 
 [build-system]
