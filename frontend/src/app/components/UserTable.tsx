@@ -1,31 +1,61 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RecentUsersCarousel from './RecentUsersCarousel';
+import { API_BASE_URL } from '@/lib/config';
 
 interface User {
   id: number;
   username: string;
   age: number;
-  eyeColor: string;
+  eye_color: string;
 }
 
-const mockData: User[] = [
-  { id: 1, username: 'alice_smith', age: 28, eyeColor: 'Brown' },
-  { id: 2, username: 'bob_johnson', age: 34, eyeColor: 'Blue' },
-  { id: 3, username: 'charlie_brown', age: 22, eyeColor: 'Green' },
-  { id: 4, username: 'diana_prince', age: 29, eyeColor: 'Hazel' },
-  { id: 5, username: 'eve_adams', age: 31, eyeColor: 'Brown' },
-];
-
 export default function UserTable() {
-  const [users, setUsers] = useState<User[]>(mockData);
+  const [users, setUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({ username: '', age: '', eyeColor: 'Brown' });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = (id: number) => {
-    setUsers(users.filter(user => user.id !== id));
+  // Fetch users from API on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_BASE_URL}/users`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      setUsers(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load users. Please check if the backend is running.');
+      console.error('Error fetching users:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+      setUsers(users.filter(user => user.id !== id));
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete user');
+      console.error('Error deleting user:', err);
+    }
   };
 
   const handleEdit = (user: User) => {
@@ -33,7 +63,7 @@ export default function UserTable() {
     setFormData({
       username: user.username,
       age: user.age.toString(),
-      eyeColor: user.eyeColor
+      eyeColor: user.eye_color
     });
     setIsModalOpen(true);
   };
@@ -44,7 +74,7 @@ export default function UserTable() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.username || !formData.age) {
@@ -58,21 +88,60 @@ export default function UserTable() {
       return;
     }
 
-    if (editingUser) {
-      // Update existing user
-      setUsers(users.map(user => 
-        user.id === editingUser.id 
-          ? { ...user, username: formData.username, age, eyeColor: formData.eyeColor }
-          : user
-      ));
-    } else {
-      // Add new user
-      const newId = Math.max(...users.map(u => u.id), 0) + 1;
-      setUsers([...users, { id: newId, username: formData.username, age, eyeColor: formData.eyeColor }]);
+    try {
+      if (editingUser) {
+        // Update existing user
+        const response = await fetch(`${API_BASE_URL}/users/${editingUser.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            age,
+            eye_color: formData.eyeColor
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update user');
+        }
+        
+        const updatedUser = await response.json();
+        setUsers(users.map(user => 
+          user.id === editingUser.id 
+            ? updatedUser
+            : user
+        ));
+      } else {
+        // Add new user
+        const response = await fetch(`${API_BASE_URL}/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            age,
+            eye_color: formData.eyeColor
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to create user');
+        }
+        
+        const newUser = await response.json();
+        setUsers([...users, newUser]);
+      }
+      
+      setError(null);
+      setIsModalOpen(false);
+      setFormData({ username: '', age: '', eyeColor: 'Brown' });
+    } catch (err) {
+      setError(editingUser ? 'Failed to update user' : 'Failed to create user');
+      console.error('Error saving user:', err);
     }
-
-    setIsModalOpen(false);
-    setFormData({ username: '', age: '', eyeColor: 'Brown' });
   };
 
   const handleCloseModal = () => {
@@ -86,6 +155,18 @@ export default function UserTable() {
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20">
           <div className="p-8">
             <h2 className="text-3xl font-semibold text-gray-800 mb-8 tracking-tight">User Management</h2>
+            
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+            
+            {isLoading && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Loading users...</p>
+              </div>
+            )}
             
             <div className="overflow-x-auto rounded-lg border border-gray-100">
               <table className="w-full">
@@ -122,9 +203,9 @@ export default function UserTable() {
                         <div className="flex items-center gap-2">
                           <div 
                             className="w-4 h-4 rounded-full border-2 border-gray-200 shadow-sm"
-                            style={{ backgroundColor: user.eyeColor.toLowerCase() }}
+                            style={{ backgroundColor: user.eye_color.toLowerCase() }}
                           ></div>
-                          <span className="text-sm text-gray-700">{user.eyeColor}</span>
+                          <span className="text-sm text-gray-700">{user.eye_color}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -149,22 +230,26 @@ export default function UserTable() {
               </table>
             </div>
 
-            <div className="mt-8 flex justify-between items-center">
-              <div className="text-sm text-gray-500">
-                Showing <span className="font-semibold text-gray-700">{users.length}</span> users
-              </div>
-              <button 
-                onClick={handleAdd}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
-              >
-                + Add New User
-              </button>
-            </div>
+            {!isLoading && (
+              <>
+                <div className="mt-8 flex justify-between items-center">
+                  <div className="text-sm text-gray-500">
+                    Showing <span className="font-semibold text-gray-700">{users.length}</span> users
+                  </div>
+                  <button 
+                    onClick={handleAdd}
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
+                  >
+                    + Add New User
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         {/* Recent Users Carousel */}
-        <RecentUsersCarousel users={users} />
+        {!isLoading && <RecentUsersCarousel users={users} />}
       </div>
 
       {/* Modal */}

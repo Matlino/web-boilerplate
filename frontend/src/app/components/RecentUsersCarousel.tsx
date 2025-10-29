@@ -6,7 +6,7 @@ interface User {
   id: number;
   username: string;
   age: number;
-  eyeColor: string;
+  eye_color: string;
 }
 
 interface RecentUsersCarouselProps {
@@ -19,11 +19,6 @@ export default function RecentUsersCarousel({ users }: RecentUsersCarouselProps)
   // Get the 3 most recent users (last 3 added)
   const recentUsers = users.slice(-3);
   
-  // If we have less than 3 users, don't show carousel
-  if (recentUsers.length === 0) {
-    return null;
-  }
-
   useEffect(() => {
     if (recentUsers.length <= 1) return;
 
@@ -33,6 +28,11 @@ export default function RecentUsersCarousel({ users }: RecentUsersCarouselProps)
 
     return () => clearInterval(interval);
   }, [recentUsers.length]);
+
+  // If we have less than 3 users, don't show carousel
+  if (recentUsers.length === 0) {
+    return null;
+  }
 
   const currentUser = recentUsers[currentIndex];
 
@@ -57,7 +57,7 @@ export default function RecentUsersCarousel({ users }: RecentUsersCarouselProps)
                   <div className="relative">
                     <div 
                       className="w-16 h-16 rounded-full border-3 border-indigo-200 shadow-md"
-                      style={{ backgroundColor: currentUser.eyeColor.toLowerCase() }}
+                      style={{ backgroundColor: currentUser.eye_color.toLowerCase() }}
                     ></div>
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full border-2 border-white"></div>
                   </div>
@@ -73,9 +73,9 @@ export default function RecentUsersCarousel({ users }: RecentUsersCarouselProps)
                     <div className="flex items-center gap-2">
                       <div 
                         className="w-4 h-4 rounded-full border-2 border-gray-200"
-                        style={{ backgroundColor: currentUser.eyeColor.toLowerCase() }}
+                        style={{ backgroundColor: currentUser.eye_color.toLowerCase() }}
                       ></div>
-                      <p className="text-lg font-medium text-gray-800">{currentUser.eyeColor}</p>
+                      <p className="text-lg font-medium text-gray-800">{currentUser.eye_color}</p>
                     </div>
                   </div>
 
