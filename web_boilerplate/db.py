@@ -1,13 +1,13 @@
 from typing import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from .settings import settings
 
 
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 
 def create_engine() -> AsyncEngine:
@@ -15,7 +15,11 @@ def create_engine() -> AsyncEngine:
 
 
 engine: AsyncEngine = create_engine()
-SessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+SessionLocal = sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:

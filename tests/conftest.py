@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from web_boilerplate.db import Base, get_db_session
@@ -36,8 +37,10 @@ async def test_engine():
 @pytest.fixture(scope="function")
 async def test_session(test_engine):
     """Create a test database session"""
-    async_session_maker = async_sessionmaker(
-        test_engine, class_=AsyncSession, expire_on_commit=False
+    async_session_maker = sessionmaker(
+        bind=test_engine,
+        class_=AsyncSession,
+        expire_on_commit=False
     )
     
     async with async_session_maker() as session:

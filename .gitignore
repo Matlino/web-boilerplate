@@ -54,4 +54,11 @@ out/
 .turbo/
 .vercel/
 
+# Airflow (runtime files - don't commit these)
+airflow/*.pid
+airflow/*.db
+airflow/logs/
+airflow/airflow.cfg
+airflow/webserver_config.py
+
 
