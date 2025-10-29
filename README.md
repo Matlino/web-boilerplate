@@ -22,3 +22,8 @@
      - `DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/app_db`
 4. Test DB health endpoint:
    - `curl http://localhost:8000/health/db`
+
+
+### Tests
+## Unit
+`python -m pytest`
