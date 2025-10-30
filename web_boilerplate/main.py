@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db import get_db_session, engine, Base
 from .api import users  # Import the router
+from .api import stats
 
 
 app = FastAPI(title="Web Boilerplate")
@@ -20,6 +21,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(users.router)
+app.include_router(stats.router)
 
 
 @app.get("/")

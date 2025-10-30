@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from .models.user import User
+from .models.statistics import UserStatistics
+from .db import Base
 from .settings import settings
 
 
@@ -45,6 +47,22 @@ async def get_user_statistics() -> Dict[str, Any]:
             select(func.min(User.age), func.max(User.age))
         )
         min_age, max_age = age_stats_result.one()
+
+        # Ensure tables exist in case API app isn't running
+        async with session.bind.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+        # Persist statistics
+        stats_row = UserStatistics(
+            calculated_at=datetime.utcnow(),
+            total_users=int(total_users or 0),
+            average_age=float(avg_age or 0),
+            min_age=int(min_age or 0),
+            max_age=int(max_age or 0),
+            eye_color_distribution=eye_color_dist,
+        )
+        session.add(stats_row)
+        await session.commit()
         
     await engine.dispose()
     

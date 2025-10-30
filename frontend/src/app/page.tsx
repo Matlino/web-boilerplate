@@ -1,4 +1,5 @@
 import UserTable from './components/UserTable';
+import StatsWidget from './components/StatsWidget';
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       {/* Main content */}
       <div className="relative z-10">
         <UserTable />
+        <StatsWidget />
       </div>
     </div>
   );
